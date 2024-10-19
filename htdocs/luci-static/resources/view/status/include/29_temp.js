@@ -29,21 +29,33 @@ return baseclass.extend({
 			])
 		);
 
-		let st_template = "^sensor[0-9]+_thermal$";
+		let st_template_list = [ "^tsens_tz_sensor[0-9]+$", "^sensor[0-9]+_thermal$" ];
+		let st_template = null;
 
 		for(let [k, v] of Object.entries(tempData)) {
 			v.sort((a, b) => (a.number > b.number) ? 1 : (a.number < b.number) ? -1 : 0)
 
+			let st_template = null;
 			let st_count = 0;
-			for (let i of Object.values(v)) {
-				let sensor = i.title;
-				if (sensor !== undefined) {
-					let st_name = sensor.match(st_template);
-					if (st_name) {
-						st_count += 1;
-					};
-				};
-			};
+			
+			for (let t = 0; t < st_template_list.length; t++) {
+				let template = st_template_list[t];
+				let t_count = 0;
+				for (let i of Object.values(v)) {
+					let sensor = i.title;
+					if (sensor !== undefined) {
+						let st_name = sensor.match(template);
+						if (st_name) {
+							t_count += 1;
+						}
+					}
+				}
+				if (t_count > 4) {
+					st_count = t_count;
+					st_template = template;
+					break;
+				}
+			}
 			let st = { };
 			if (st_count > 4) {
 				st = { min: null, med: [ ], max: null };
@@ -57,7 +69,7 @@ return baseclass.extend({
 					continue;
 				};
 				
-				let st_name = sensor.match(st_template);
+				let st_name = (st_template == null) ? null : sensor.match(st_template);
 
 				for (let j of i.sources) {
 					let name = sensor;
