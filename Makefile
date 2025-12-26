@@ -14,6 +14,16 @@ LUCI_DEPENDS:=+ucode +ucode-mod-fs
 LUCI_PKGARCH:=all
 PKG_LICENSE:=MIT
 
+define Package/$(LUCI_NAME)/postinst
+#!/bin/sh
+if [ -z "$${IPKG_INSTROOT}" ]; then
+	/etc/init.d/rpcd restart
+fi
+endef
+
+define Package/$(LUCI_NAME)/prerm
+endef
+
 #include ../../luci.mk
 include $(TOPDIR)/feeds/luci/luci.mk
 
